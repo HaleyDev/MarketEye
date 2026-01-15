@@ -3,3 +3,6 @@ dist
 build/main
 main.spec
 __pycache__
+demo.py
+MarketEye.spec
+build

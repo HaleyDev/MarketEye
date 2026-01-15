@@ -36,6 +36,24 @@ class FloatCardWidget(QWidget):
         self.drag_handle = DragHandle()
         self.init_ui(name, code, price, percent, is_up)
         self.setup_window_flags()
+    
+    def format_price(self, price):
+        """格式化价格显示，防止过长"""
+        if isinstance(price, str):
+            try:
+                price_float = float(price)
+            except:
+                return price[:8]  # 如果转换失败，截断显示
+        else:
+            price_float = price
+        
+        # 根据价格大小选择显示格式
+        if price_float >= 1000:
+            return f"{price_float:.1f}"  # 大于1000时显示1位小数
+        elif price_float >= 100:
+            return f"{price_float:.2f}"  # 100-1000显示2位小数
+        else:
+            return f"{price_float:.3f}"  # 小于100显示3位小数
         
     def init_ui(self, name, code, price, percent, is_up):
         font_family = '"Segoe UI", "Microsoft YaHei", sans-serif'
@@ -80,16 +98,19 @@ class FloatCardWidget(QWidget):
         # 主体布局
         body_layout = QHBoxLayout()
         body_layout.setContentsMargins(0, 0, 0, 0)
-        body_layout.setSpacing(8)
+        body_layout.setSpacing(6)
         
-        # 价格
-        price_label = QLabel(price)
+        # 价格 - 处理过长价格的显示
+        display_price = self.format_price(price)
+        price_label = QLabel(display_price)
         price_label.setStyleSheet(f"""
             color: #ffffff;
             font-family: {font_family};
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
+            max-width: 80px;
         """)
+        price_label.setWordWrap(False)
         
         # 涨跌幅
         percent_label = QLabel(percent)
@@ -134,8 +155,8 @@ class FloatCardWidget(QWidget):
         shadow.setOffset(0, 8)
         self.setGraphicsEffect(shadow)
         
-        # 固定大小
-        self.setFixedSize(130, 85)
+        # 固定大小 - 增加宽度以容纳更长的价格
+        self.setFixedSize(150, 85)
         
     def setup_window_flags(self):
         """设置窗口标志"""

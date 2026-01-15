@@ -493,16 +493,15 @@ class ModernMainWindow(QMainWindow):
         title = QLabel("MarketEye")
         title.setStyleSheet("font-size: 32px; font-weight: 900; color: #303133;")
         
-        subtitle = QLabel("轻量级桌面看盘助手")
+        subtitle = QLabel("轻量级桌面看盘助手 demo版")
         subtitle.setStyleSheet("font-size: 16px; color: #909399; margin-bottom: 20px;")
         
         desc = QLabel(
             "<p style='line-height:1.6'><b>MarketEye</b> 旨在提供无干扰的行情关注体验。通过任务栏嵌入和桌面悬浮窗，让您在工作之余随时掌握市场动态。</p>"
             "<hr style='margin: 15px 0; border: none; border-top: 1px solid #eee;'>"
             "<p><b>Version:</b> 1.0.0 (Beta)</p>"
-            "<p><b>License:</b> MIT Open Source</p>"
             "<br>"
-            "<p style='color:#909399; font-size: 12px;'>* 本程序当前使用随机 Mock 数据，请在源码 `data/providers/stock_provider.py` 中接入您的 API。</p>"
+            "<p style='color:#909399; font-size: 12px;'>* copy right © 2024 MarketEye.</p>"
         )
         desc.setStyleSheet("font-size: 14px; color: #606266;")
         desc.setWordWrap(True)
@@ -622,7 +621,7 @@ class ModernMainWindow(QMainWindow):
             self.taskbar_widget_instance.update_stocks(taskbar_stocks)
             self.taskbar_widget_instance.show()
             
-        QMessageBox.information(self, "成功", "展示已更新！\n数据为MOCK模拟数据，请知悉。")
+        QMessageBox.information(self, "成功", "股票监控面板已更新！")
 
     def closeEvent(self, event):
         # 最小化到托盘而不是直接退出
