@@ -588,7 +588,8 @@ class ModernMainWindow(QMainWindow):
         # 获取数据 (Mock)
         for config in self.stocks_config:
             # 获取数据
-            data = StockProvider.get_stock_data(config['code'])
+            code = config["code"]
+            data = StockProvider.get_stock_data(code)
             # 组合显示名称
             display_name = config['name']
             
@@ -599,7 +600,7 @@ class ModernMainWindow(QMainWindow):
                 
             elif config['type'] == 'ime':
                 # 创建 IME 悬浮窗
-                w = FloatIMEWidget(display_name, data['price'], data['percent'], data['is_up'])
+                w = FloatIMEWidget(code, display_name, data['price'], data['percent'], data['is_up'])
                 # 简单排布位置，防止重叠
                 count = len(self.active_widgets)
                 w.move(100, 200 + count * 50)

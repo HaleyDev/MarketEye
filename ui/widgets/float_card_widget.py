@@ -3,8 +3,10 @@
 """
 
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGraphicsDropShadowEffect
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont, QPainter, QPen, QColor
+
+from data.providers.stock_provider import StockProvider
 
 
 class DragHandle(QWidget):
@@ -36,7 +38,63 @@ class FloatCardWidget(QWidget):
         self.drag_handle = DragHandle()
         self.init_ui(name, code, price, percent, is_up)
         self.setup_window_flags()
-    
+        self.code = code
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_data)
+        self.timer.start(2000)  # 2000毫秒 = 2秒
+
+    def update_data(self):
+        try:
+            data = StockProvider.get_stock_data(self.code)
+            if data:
+                # 格式化价格
+                formatted_price = self.format_price(data['price'])
+
+                # 更新显示
+                self.update_display(
+                    formatted_price,
+                    data['percent'],
+                    data['is_up'],
+                )
+        except Exception as e:
+            print(f"更新股票数据失败 {self.code}: {e}")
+
+    def update_display(self, price, percent, is_up=True):
+        body_layout = self.layout().itemAt(2)
+        if body_layout:
+            # price_label 在 body_layout 中的索引 0
+            price_label = body_layout.itemAt(0).widget()
+            if price_label:
+                price_label.setText(price)
+                price_label.setStyleSheet(f"""
+                            color: {'#ff4d4f' if is_up else '#52c41a'};
+                            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+                            font-size: 16px;
+                            font-weight: 600;
+                            max-width: 80px;
+                        """)
+
+            # percent_label 在 body_layout 中的索引 2
+            percent_label = body_layout.itemAt(2).widget()
+            if percent_label:
+                arrow = "▲" if is_up else "▼"
+                percent_label.setText(f"{arrow} {percent}")
+
+                # 更新涨跌幅的样式
+                bg = 'rgba(255, 77, 79, 0.1)' if is_up else 'rgba(82, 196, 26, 0.1)'
+                fg = '#ff4d4f' if is_up else '#52c41a'
+
+                percent_label.setStyleSheet(f"""
+                            color: {fg};
+                            background-color: {bg};
+                            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+                            font-size: 11px;
+                            font-weight: 600;
+                            padding: 2px 4px;
+                            border-radius: 3px;
+                        """)
+        self.adjustSize()
+
     def format_price(self, price):
         """格式化价格显示，防止过长"""
         if isinstance(price, str):

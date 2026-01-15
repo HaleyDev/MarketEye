@@ -3,18 +3,69 @@
 """
 
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QFrame, QGraphicsDropShadowEffect
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont, QColor
+
+from data.providers.stock_provider import StockProvider
 
 
 class FloatIMEWidget(QWidget):
     """输入法风格悬浮窗"""
     
-    def __init__(self, name, price, percent, is_up=True):
+    def __init__(self, code, name, price, percent, is_up=True):
         super().__init__()
         self.init_ui(name, price, percent, is_up)
         self.setup_window_flags()
-        
+        self.code = code
+
+        # 设置定时器，每2秒更新一次
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_data)
+        self.timer.start(2000)  # 2000毫秒 = 2秒
+
+    def update_data(self):
+        """更新股票数据"""
+        try:
+            data = StockProvider.get_stock_data(self.code)
+            if data:
+                self.update_display(
+                    data['price'],
+                    data['percent'],
+                    data['is_up'],
+                )
+        except Exception as e:
+            print(e)
+
+
+    def update_display(self, price, percent, is_up=True):
+        for i in range(self.layout().count()):
+            widget = self.layout().itemAt(i).widget()
+            if isinstance(widget, QLabel):
+                if i == 0 :
+                    continue
+                elif i == 2:  # 价格标签
+                    widget.setText(price)
+                    color = '#ff4d4f' if is_up else '#52c41a'
+                    widget.setStyleSheet(f"""
+                                color: {color};
+                                font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+                                font-size: 13px;
+                                font-weight: bold;
+                            """)
+                elif i == 3:  # 涨跌幅标签
+                    arrow = "▲" if is_up else "▼"
+                    widget.setText(f"{arrow} {percent}")
+                    color = '#ff4d4f' if is_up else '#52c41a'
+                    widget.setStyleSheet(f"""
+                                color: {color};
+                                font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+                                font-size: 13px;
+                                font-weight: bold;
+                            """)
+
+        self.adjustSize()
+
+
     def init_ui(self, name, price, percent, is_up):
         layout = QHBoxLayout()
         layout.setContentsMargins(10, 6, 10, 6)
